@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model TeamMember {
+  id          String   @id @default(cuid())
+  name        String
+  designation String
+  about       String   @db.Text
+  imageKey    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+enum ServiceCategory {
+  GENERAL
+  ORTHOPAEDIC
+  OBSTETRICS_GYNAECOLOGY
+}
+
+model Service {
+  id          String          @id @default(cuid())
+  category    ServiceCategory
+  name        String
+  description String?         @db.Text
+  imageKey    String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+model Condition {
+  id          String          @id @default(cuid())
+  name        String
+  slug        String          @unique
+  description String          @db.Text
+  imageKey    String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  items       ConditionItem[]
+}
+
+model ConditionItem {
+  id          String    @id @default(cuid())
+  conditionId String
+  name        String
+  description String    @db.Text
+  imageKey    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  condition   Condition @relation(fields: [conditionId], references: [id], onDelete: Cascade)
+}
+
+enum GalleryMediaType {
+  IMAGE
+  VIDEO
+}
+
+model GalleryItem {
+  id        String           @id @default(cuid())
+  mediaType GalleryMediaType
+  mediaKey  String
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+}
+
+enum AppointmentStatus {
+  NEW
+  CONTACTED
+  COMPLETED
+  CANCELLED
+}
+
+enum AppointmentSpeciality {
+  ORTHOPAEDICS
+  OBSTETRICS_GYNAECOLOGY
+  OPHTHALMOLOGY
+}
+
+model Appointment {
+  id               String                 @id @default(cuid())
+  name             String
+  phoneNumber      String
+  appointmentDate  DateTime?
+  speciality       AppointmentSpeciality?
+  timing           String?
+  problem          String                 @db.Text
+  description      String?                @db.Text
+  status            AppointmentStatus      @default(NEW)
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+}
+
