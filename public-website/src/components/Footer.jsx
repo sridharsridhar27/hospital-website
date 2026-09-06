@@ -323,7 +323,7 @@ export default function EnhancedFooter() {
 
 
               <h3 className="text-base font-extrabold text-[#064e3b]">
-                Swasthic Healthcare
+                Swasthik Healthcare
               </h3>
 
 
@@ -515,7 +515,7 @@ export default function EnhancedFooter() {
             {/* COPYRIGHT */}
 
             <p className="text-center text-[11px] text-emerald-100/70 sm:text-left">
-              © {new Date().getFullYear()} Swasthic Healthcare.
+              © {new Date().getFullYear()} Swasthik Healthcare.
               All Rights Reserved.
             </p>
 
