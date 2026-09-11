@@ -174,23 +174,24 @@ function Hero() {
 
             {/* Main Headline */}
             <motion.h1
-              variants={itemVariants}
-              className="mt-5 text-4xl font-extrabold tracking-tight text-swasthic-text sm:text-5xl lg:text-6xl lg:leading-[1.12]"
-            >
-              Live Pain-Free. <br />
-              <span className="bg-gradient-to-r from-swasthic-primary via-emerald-600 to-teal-500 bg-clip-text text-transparent">
-                Move Better.
-              </span>
-            </motion.h1>
-
+  variants={itemVariants}
+  className="mt-5 text-4xl font-extrabold tracking-tight text-swasthic-text sm:text-5xl lg:text-6xl lg:leading-[1.12]"
+>
+  Swasthik Healthcare <br />
+  <span className="bg-gradient-to-r from-swasthic-primary via-emerald-600 to-teal-500 bg-clip-text text-transparent">
+    Live Pain-Free. Move Better.
+  </span>
+</motion.h1>
             {/* Subtext Paragraph */}
-            <motion.p
-              variants={itemVariants}
-              className="mt-5 max-w-xl text-base leading-relaxed text-swasthic-muted sm:text-lg"
-            >
-              Empowering your recovery with evidence-based physiotherapy and
-              modern joint care—tailored for long-term pain relief without surgery.
-            </motion.p>
+           <motion.p
+  variants={itemVariants}
+  className="mt-5 max-w-xl text-base leading-relaxed text-swasthic-muted sm:text-lg"
+>
+  Swasthik Healthcare in Kodungaiyur, Chennai provides specialist
+  healthcare services in Orthopaedics, Ophthalmology, Obstetrics &
+  Gynaecology, and pain management, with patient-focused care for
+  individuals and families.
+</motion.p>
 
             {/* Premium Stat Cards Grid */}
             <motion.div
