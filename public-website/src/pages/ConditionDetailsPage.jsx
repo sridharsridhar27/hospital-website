@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import SEO from '../components/SEO';
+
 import {
   getConditionBySlug,
   getConditionItems,
@@ -48,7 +50,9 @@ const ConditionHeader = React.memo(({ condition }) => {
         transition={{ delay: 0.1 }}
         className="mt-3 font-[Space_Grotesk] text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl"
       >
-        {condition?.name ? `Understanding ${condition.name}` : 'Condition Information'}
+        {condition?.name
+          ? `Understanding ${condition.name}`
+          : 'Condition Information'}
       </motion.h1>
 
       <motion.p
@@ -88,7 +92,9 @@ const ErrorState = React.memo(({ error, onRetry, isRetrying }) => (
       disabled={isRetrying}
       className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white shadow-md transition-all hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50"
     >
-      <RefreshCw className={`h-3.5 w-3.5 ${isRetrying ? 'animate-spin' : ''}`} />
+      <RefreshCw
+        className={`h-3.5 w-3.5 ${isRetrying ? 'animate-spin' : ''}`}
+      />
       {isRetrying ? 'Retrying...' : 'Try Again'}
     </button>
   </motion.div>
@@ -243,7 +249,7 @@ const DetailModal = React.memo(({ selectedItem, onClose }) => {
   if (!selectedItem) return null;
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 lg:p-8"
       role="dialog"
       aria-modal="true"
@@ -299,7 +305,10 @@ const DetailModal = React.memo(({ selectedItem, onClose }) => {
               <Sparkles className="h-3 w-3 text-emerald-300" />
               Specialist Care Module
             </span>
-            <h2 id="modal-title" className="mt-2 text-2xl font-bold tracking-tight text-white sm:text-3xl">
+            <h2
+              id="modal-title"
+              className="mt-2 text-2xl font-bold tracking-tight text-white sm:text-3xl"
+            >
               {selectedItem.name}
             </h2>
           </div>
@@ -365,39 +374,47 @@ function ConditionDetailsPage() {
   /**
    * Data fetching with AbortController to handle race conditions and unmount cleanups
    */
-  const fetchConditionDetails = useCallback(async (signal) => {
-    try {
-      setLoading(true);
-      setError('');
+  const fetchConditionDetails = useCallback(
+    async (signal) => {
+      try {
+        setLoading(true);
+        setError('');
 
-      const conditionResponse = await getConditionBySlug(slug, { signal });
-      const conditionData = conditionResponse?.data;
+        const conditionResponse = await getConditionBySlug(slug, { signal });
+        const conditionData = conditionResponse?.data;
 
-      if (!conditionData) {
-        throw new Error('Condition metadata could not be found.');
+        if (!conditionData) {
+          throw new Error('Condition metadata could not be found.');
+        }
+
+        setCondition(conditionData);
+
+        if (conditionData.id) {
+          const itemsResponse = await getConditionItems(conditionData.id, {
+            signal,
+          });
+          setItems(itemsResponse?.data || []);
+        } else {
+          setItems([]);
+        }
+      } catch (err) {
+        // Ignore abort errors caused by rapid route switches
+        if (err.name === 'CanceledError' || err.name === 'AbortError') {
+          return;
+        }
+
+        console.error('Failed to fetch condition details:', err);
+        setError(
+          err.response?.data?.message ||
+            err.message ||
+            'Failed to load condition details.'
+        );
+      } finally {
+        setLoading(false);
       }
-
-      setCondition(conditionData);
-
-      if (conditionData.id) {
-        const itemsResponse = await getConditionItems(conditionData.id, { signal });
-        setItems(itemsResponse?.data || []);
-      } else {
-        setItems([]);
-      }
-    } catch (err) {
-      // Ignore abort errors caused by rapid route switches
-      if (err.name === 'CanceledError' || err.name === 'AbortError') {
-        return;
-      }
-      console.error('Failed to fetch condition details:', err);
-      setError(
-        err.response?.data?.message || err.message || 'Failed to load condition details.'
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [slug]);
+    },
+    [slug]
+  );
 
   useEffect(() => {
     const controller = new AbortController();
@@ -416,95 +433,113 @@ function ConditionDetailsPage() {
     setSelectedItem(null);
   }, []);
 
-  return (
-    <section className="relative min-h-screen overflow-hidden bg-slate-50/50 px-4 py-16 sm:px-8 lg:px-12">
-      {/* Background Ambient Lighting */}
-      <div className="pointer-events-none absolute -left-40 top-1/6 h-[500px] w-[500px] rounded-full bg-[#0E5C4E]/10 blur-[120px]" />
-      <div className="pointer-events-none absolute -right-40 bottom-1/4 h-[500px] w-[500px] rounded-full bg-[#0E5C4E]/10 blur-[120px]" />
+  const conditionName = condition?.name?.trim();
 
-      {/* Background Subtle Grid Pattern */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.02]"
-        style={{
-          backgroundImage: `radial-gradient(#0E5C4E 1px, transparent 1px)`,
-          backgroundSize: '24px 24px',
-        }}
+  const seoTitle = conditionName
+    ? `${conditionName} Treatment & Care | Swasthik Healthcare Chennai`
+    : 'Condition Information | Swasthik Healthcare Chennai';
+
+  const seoDescription = conditionName
+    ? `Learn about ${conditionName.toLowerCase()}, symptoms, treatment information, and specialist care available at Swasthik Healthcare in Kodungaiyur, Chennai.`
+    : 'Explore condition information, symptoms, treatment details, and specialist care at Swasthik Healthcare in Kodungaiyur, Chennai.';
+
+  return (
+    <>
+      <SEO
+        title={seoTitle}
+        description={seoDescription}
+        path={`/conditions/${slug}`}
       />
 
-      <div className="relative mx-auto max-w-7xl">
-        {/* =====================================================
-            BACK BUTTON
-        ===================================================== */}
-        <motion.div
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-        >
-          <Link
-            to="/conditions"
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200/80 bg-white px-4 py-2 text-xs font-semibold text-[#0E5C4E] shadow-sm backdrop-blur-md transition-all hover:border-[#0E5C4E]/40 hover:bg-[#0E5C4E]/5 focus:outline-none focus:ring-2 focus:ring-[#0E5C4E]/20"
+      <section className="relative min-h-screen overflow-hidden bg-slate-50/50 px-4 py-16 sm:px-8 lg:px-12">
+        {/* Background Ambient Lighting */}
+        <div className="pointer-events-none absolute -left-40 top-1/6 h-[500px] w-[500px] rounded-full bg-[#0E5C4E]/10 blur-[120px]" />
+        <div className="pointer-events-none absolute -right-40 bottom-1/4 h-[500px] w-[500px] rounded-full bg-[#0E5C4E]/10 blur-[120px]" />
+
+        {/* Background Subtle Grid Pattern */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.02]"
+          style={{
+            backgroundImage: `radial-gradient(#0E5C4E 1px, transparent 1px)`,
+            backgroundSize: '24px 24px',
+          }}
+        />
+
+        <div className="relative mx-auto max-w-7xl">
+          {/* =====================================================
+              BACK BUTTON
+          ===================================================== */}
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
           >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Directory
-          </Link>
-        </motion.div>
+            <Link
+              to="/conditions"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200/80 bg-white px-4 py-2 text-xs font-semibold text-[#0E5C4E] shadow-sm backdrop-blur-md transition-all hover:border-[#0E5C4E]/40 hover:bg-[#0E5C4E]/5 focus:outline-none focus:ring-2 focus:ring-[#0E5C4E]/20"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Directory
+            </Link>
+          </motion.div>
 
-        {/* =====================================================
-            HEADER SECTION
-        ===================================================== */}
-        <ConditionHeader condition={condition} />
+          {/* =====================================================
+              HEADER SECTION
+          ===================================================== */}
+          <ConditionHeader condition={condition} />
 
-        {/* =====================================================
-            ERROR STATE
-        ===================================================== */}
-        {error && (
-          <ErrorState
-            error={error}
-            onRetry={() => fetchConditionDetails()}
-            isRetrying={loading}
-          />
-        )}
-
-        {/* =====================================================
-            LOADING SKELETON GRID
-        ===================================================== */}
-        {loading && !error && <SkeletonGrid count={6} />}
-
-        {/* =====================================================
-            EMPTY STATE
-        ===================================================== */}
-        {!loading && !error && items.length === 0 && <EmptyState />}
-
-        {/* =====================================================
-            CONDITION ITEMS GRID
-        ===================================================== */}
-        {!loading && !error && items.length > 0 && (
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <AnimatePresence>
-              {items.map((item, index) => (
-                <ConditionItemCard
-                  key={item.id || index}
-                  item={item}
-                  index={index}
-                  onSelect={handleSelectItem}
-                />
-              ))}
-            </AnimatePresence>
-          </div>
-        )}
-
-        {/* =====================================================
-            FULL DETAILS OVERLAY / PREMIUM MODAL CARD
-        ===================================================== */}
-        <AnimatePresence>
-          {selectedItem && (
-            <DetailModal
-              selectedItem={selectedItem}
-              onClose={handleCloseModal}
+          {/* =====================================================
+              ERROR STATE
+          ===================================================== */}
+          {error && (
+            <ErrorState
+              error={error}
+              onRetry={() => fetchConditionDetails()}
+              isRetrying={loading}
             />
           )}
-        </AnimatePresence>
-      </div>
-    </section>
+
+          {/* =====================================================
+              LOADING SKELETON GRID
+          ===================================================== */}
+          {loading && !error && <SkeletonGrid count={6} />}
+
+          {/* =====================================================
+              EMPTY STATE
+          ===================================================== */}
+          {!loading && !error && items.length === 0 && <EmptyState />}
+
+          {/* =====================================================
+              CONDITION ITEMS GRID
+          ===================================================== */}
+          {!loading && !error && items.length > 0 && (
+            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <AnimatePresence>
+                {items.map((item, index) => (
+                  <ConditionItemCard
+                    key={item.id || index}
+                    item={item}
+                    index={index}
+                    onSelect={handleSelectItem}
+                  />
+                ))}
+              </AnimatePresence>
+            </div>
+          )}
+
+          {/* =====================================================
+              FULL DETAILS OVERLAY / PREMIUM MODAL CARD
+          ===================================================== */}
+          <AnimatePresence>
+            {selectedItem && (
+              <DetailModal
+                selectedItem={selectedItem}
+                onClose={handleCloseModal}
+              />
+            )}
+          </AnimatePresence>
+        </div>
+      </section>
+    </>
   );
 }
 
