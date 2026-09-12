@@ -77,10 +77,10 @@ const RichServiceCard = React.memo(({ service, onSelect, Icon }) => (
     variants={cardVariants}
     whileHover={{ y: -6 }}
     onClick={() => onSelect(service)}
-    className="group relative flex h-auto min-h-[380px] sm:min-h-[420px] md:h-[460px] cursor-pointer flex-col justify-between overflow-hidden rounded-2xl sm:rounded-3xl md:rounded-[2.5rem] border border-[#E5E9E5] bg-white/90 p-3 sm:p-4 shadow-sm backdrop-blur-sm transition-all duration-500 hover:border-[#0E5C4E]/30 hover:shadow-[0_25px_50px_-12px_rgba(14,92,78,0.15)]"
+    className="group relative flex h-full min-h-[360px] sm:min-h-[420px] cursor-pointer flex-col justify-between overflow-hidden rounded-2xl sm:rounded-3xl md:rounded-[2.5rem] border border-[#E5E9E5] bg-white/90 p-3.5 sm:p-4 shadow-sm backdrop-blur-sm transition-all duration-500 hover:border-[#0E5C4E]/30 hover:shadow-[0_25px_50px_-12px_rgba(14,92,78,0.15)]"
   >
     <div className="flex flex-1 flex-col overflow-hidden">
-      <div className="relative h-40 xs:h-44 sm:h-48 w-full shrink-0 overflow-hidden rounded-xl sm:rounded-[2rem] bg-[#F1F8F5]">
+      <div className="relative h-40 sm:h-48 w-full shrink-0 overflow-hidden rounded-xl sm:rounded-[2rem] bg-[#F1F8F5]">
         {service.imageUrl ? (
           <img
             src={service.imageUrl}
@@ -104,7 +104,7 @@ const RichServiceCard = React.memo(({ service, onSelect, Icon }) => (
 
       <div className="flex flex-1 flex-col justify-between p-2.5 sm:p-4 pt-3 sm:pt-5">
         <div>
-          <h3 className="line-clamp-2 sm:line-clamp-1 font-[Space_Grotesk] text-lg sm:text-xl font-bold text-[#16241F] transition-colors duration-300 group-hover:text-[#0E5C4E]">
+          <h3 className="line-clamp-2 font-[Space_Grotesk] text-base sm:text-xl font-bold text-[#16241F] transition-colors duration-300 group-hover:text-[#0E5C4E]">
             {service.name}
           </h3>
           {service.description && (
@@ -171,7 +171,7 @@ const CompactServiceCard = React.memo(({ service, onSelect }) => (
     >
       <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
     </button>
-    <Sparkles className="absolute right-3 top-2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#FF6B45]/20 opacity-0 transition-all duration-300 group-hover:opacity-100 hidden xs:block" />
+    <Sparkles className="absolute right-3 top-2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#FF6B45]/20 opacity-0 transition-all duration-300 group-hover:opacity-100 hidden sm:block" />
   </motion.div>
 ));
 CompactServiceCard.displayName = 'CompactServiceCard';
@@ -185,8 +185,14 @@ const ServiceModal = React.memo(({ selectedService, config, onClose }) => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') onClose();
     };
+
+    document.body.style.overflow = 'hidden';
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = 'unset';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [onClose]);
 
   if (!selectedService) return null;
@@ -214,9 +220,9 @@ const ServiceModal = React.memo(({ selectedService, config, onClose }) => {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="relative z-10 my-auto max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl sm:rounded-[2.5rem] border border-[#E5E9E5] bg-white shadow-2xl"
+          className="relative z-10 my-auto max-h-[90dvh] w-full max-w-2xl overflow-y-auto rounded-2xl sm:rounded-[2.5rem] border border-[#E5E9E5] bg-white shadow-2xl"
         >
-          <div className="relative h-48 xs:h-56 sm:h-72 w-full shrink-0 bg-[#F1F8F5]">
+          <div className="relative h-44 sm:h-64 lg:h-72 w-full shrink-0 bg-[#F1F8F5]">
             {selectedService.imageUrl ? (
               <img
                 src={selectedService.imageUrl}
@@ -225,7 +231,7 @@ const ServiceModal = React.memo(({ selectedService, config, onClose }) => {
               />
             ) : (
               <div className="flex h-full flex-col items-center justify-center text-[#62726C] p-4 text-center">
-                <Icon className="h-12 w-12 sm:h-16 sm:w-16 opacity-30" />
+                <Icon className="h-10 w-10 sm:h-16 sm:w-16 opacity-30" />
                 <span className="mt-2 text-xs sm:text-sm font-semibold">
                   Service Details
                 </span>
@@ -253,14 +259,14 @@ const ServiceModal = React.memo(({ selectedService, config, onClose }) => {
             </div>
           </div>
 
-          <div className="p-4 xs:p-6 sm:p-8">
+          <div className="p-4 sm:p-6 lg:p-8">
             <h2
               id="modal-service-title"
-              className="font-[Space_Grotesk] text-xl xs:text-2xl font-extrabold text-[#16241F] sm:text-3xl"
+              className="font-[Space_Grotesk] text-xl font-extrabold text-[#16241F] sm:text-2xl lg:text-3xl"
             >
               {selectedService.name}
             </h2>
-            <p className="mt-3 sm:mt-4 text-xs xs:text-sm leading-relaxed text-[#62726C] sm:text-base">
+            <p className="mt-2.5 sm:mt-4 text-xs sm:text-sm lg:text-base leading-relaxed text-[#62726C]">
               {selectedService.description ||
                 'Detailed clinical description for this medical procedure will be published shortly. Contact our healthcare team directly for additional clinical parameters.'}
             </p>
@@ -289,13 +295,13 @@ ServiceModal.displayName = 'ServiceModal';
 
 // Sub-Component: Loading Skeleton
 const ServicesSkeleton = () => (
-  <div className="mt-8 sm:mt-12 md:mt-16 grid grid-cols-1 gap-4 xs:gap-6 sm:grid-cols-2 lg:grid-cols-3">
+  <div className="mt-8 sm:mt-12 md:mt-16 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
     {[1, 2, 3].map((i) => (
       <div
         key={i}
-        className="h-[380px] sm:h-[420px] md:h-[460px] w-full animate-pulse rounded-2xl sm:rounded-3xl md:rounded-[2.5rem] border border-[#E5E9E5] bg-white/60 p-3 sm:p-4 shadow-sm"
+        className="h-[360px] sm:h-[420px] w-full animate-pulse rounded-2xl sm:rounded-3xl md:rounded-[2.5rem] border border-[#E5E9E5] bg-white/60 p-3.5 sm:p-4 shadow-sm"
       >
-        <div className="h-40 xs:h-44 sm:h-48 w-full rounded-xl sm:rounded-[2rem] bg-[#E8F4EF]/60" />
+        <div className="h-40 sm:h-48 w-full rounded-xl sm:rounded-[2rem] bg-[#E8F4EF]/60" />
         <div className="mt-4 sm:mt-6 h-5 sm:h-6 w-3/4 rounded-md bg-gray-200" />
         <div className="mt-3 h-3.5 sm:h-4 w-full rounded-md bg-gray-100" />
         <div className="mt-2 h-3.5 sm:h-4 w-1/2 rounded-md bg-gray-100" />
@@ -386,11 +392,11 @@ function Services({ category, onServiceClick }) {
   const isError = status === 'error';
 
   return (
-    <div className="relative overflow-hidden bg-[#FAFDFB] text-[#16241F]">
+    <div className="relative overflow-hidden bg-[#FAFDFB] text-[#16241F] antialiased">
       <div className="pointer-events-none absolute -left-40 -top-40 h-[300px] w-[300px] sm:h-[500px] sm:w-[500px] rounded-full bg-[#0E5C4E]/5 blur-[80px] sm:blur-[120px]" />
       <div className="pointer-events-none absolute -right-40 top-1/3 h-[300px] w-[300px] sm:h-[500px] sm:w-[500px] rounded-full bg-[#FF6B45]/5 blur-[80px] sm:blur-[120px]" />
 
-      <section className="relative px-4 xs:px-6 sm:px-10 lg:px-16 pt-8 sm:pt-12 pb-16 sm:pb-24">
+      <section className="relative px-4 sm:px-8 lg:px-12 pt-8 sm:pt-12 pb-16 sm:pb-24">
         <div className="mx-auto max-w-7xl">
           <header className="relative mx-auto max-w-3xl text-center">
             <motion.div
@@ -407,7 +413,7 @@ function Services({ category, onServiceClick }) {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="mt-4 sm:mt-6 font-[Space_Grotesk] text-2xl xs:text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-[#16241F]"
+              className="mt-4 sm:mt-6 font-[Space_Grotesk] text-2xl sm:text-5xl lg:text-6xl font-black tracking-tight text-[#16241F]"
             >
               {config.title}
             </motion.h1>
@@ -416,7 +422,7 @@ function Services({ category, onServiceClick }) {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="mt-3 sm:mt-4 text-xs xs:text-sm sm:text-lg leading-relaxed text-[#62726C]"
+              className="mt-3 sm:mt-4 text-xs sm:text-base lg:text-lg leading-relaxed text-[#62726C]"
             >
               {config.description}
             </motion.p>
@@ -443,7 +449,7 @@ function Services({ category, onServiceClick }) {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="mx-auto max-w-lg rounded-2xl sm:rounded-[2.5rem] border border-dashed border-[#0E5C4E]/20 bg-white/50 p-6 xs:p-8 sm:p-12 text-center shadow-sm backdrop-blur-md"
+                  className="mx-auto max-w-lg rounded-2xl sm:rounded-[2.5rem] border border-dashed border-[#0E5C4E]/20 bg-white/50 p-6 sm:p-12 text-center shadow-sm backdrop-blur-md"
                 >
                   <Activity className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-[#0E5C4E]/40" />
                   <h3 className="mt-3 sm:mt-4 font-[Space_Grotesk] text-lg sm:text-xl font-bold text-[#16241F]">
@@ -458,7 +464,7 @@ function Services({ category, onServiceClick }) {
                   variants={containerVariants}
                   initial="hidden"
                   animate="visible"
-                  className="grid grid-cols-1 gap-4 xs:gap-6 sm:grid-cols-2 lg:grid-cols-3"
+                  className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3"
                 >
                   {services.map((service) =>
                     hasRichContent(service) ? (
