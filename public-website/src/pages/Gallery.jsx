@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Image as ImageIcon, Video, Maximize2, X, Play, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-import SEO from './SEO';
+import SEO from '../components/SEO';
 import { getGalleryItems } from '../api/galleryApi';
 
 // Animation Variants

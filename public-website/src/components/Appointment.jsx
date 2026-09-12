@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   CheckCircle2,
@@ -10,48 +10,16 @@ import {
 } from 'lucide-react';
 import { createAppointment } from '../api/appointmentApi';
 
-/*
- * =========================================================
- * APPOINTMENT TIMINGS
- * =========================================================
- */
-
 const specialityTimings = {
-  ORTHOPAEDICS: [
-    '6:30 PM - 9:30 PM',
-  ],
-
-  OBSTETRICS_GYNAECOLOGY: [
-    '11:00 AM - 1:30 PM',
-    '6:30 PM - 9:30 PM',
-  ],
-
-  OPHTHALMOLOGY: [
-    '6:30 PM - 9:30 PM',
-  ],
+  ORTHOPAEDICS: ['6:30 PM - 9:30 PM'],
+  OBSTETRICS_GYNAECOLOGY: ['11:00 AM - 1:30 PM', '6:30 PM - 9:30 PM'],
+  OPHTHALMOLOGY: ['6:30 PM - 9:30 PM'],
 };
 
-/*
- * =========================================================
- * SPECIALITIES
- * =========================================================
- */
-
 const specialities = [
-  {
-    value: 'ORTHOPAEDICS',
-    label: 'Orthopaedics',
-  },
-
-  {
-    value: 'OBSTETRICS_GYNAECOLOGY',
-    label: 'Obstetrics & Gynaecology',
-  },
-
-  {
-    value: 'OPHTHALMOLOGY',
-    label: 'Ophthalmology',
-  },
+  { value: 'ORTHOPAEDICS', label: 'Orthopaedics' },
+  { value: 'OBSTETRICS_GYNAECOLOGY', label: 'Obstetrics & Gynaecology' },
+  { value: 'OPHTHALMOLOGY', label: 'Ophthalmology' },
 ];
 
 function Appointment({ isOpen, onClose }) {
@@ -66,81 +34,50 @@ function Appointment({ isOpen, onClose }) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  /*
-   * =========================================================
-   * GET TODAY'S DATE
-   * =========================================================
-   */
+  // Close modal when hitting Escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpen && !loading) {
+        handleClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, loading]);
 
   const getTodayDate = () => {
     const today = new Date();
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
-
     return `${year}-${month}-${day}`;
   };
 
-  /*
-   * =========================================================
-   * CLOSE APPOINTMENT
-   * =========================================================
-   */
-
   const handleClose = () => {
-    if (loading) {
-      return;
-    }
-
+    if (loading) return;
     setError('');
     setSuccess(false);
     onClose();
   };
 
-  /*
-   * =========================================================
-   * SPECIALITY CHANGE
-   * =========================================================
-   */
-
   const handleSpecialityChange = (event) => {
-    const selectedSpeciality = event.target.value;
-    setSpeciality(selectedSpeciality);
-
-    /*
-     * Reset timing whenever speciality changes.
-     * This prevents an invalid timing from remaining selected.
-     */
+    setSpeciality(event.target.value);
     setTiming('');
   };
-
-  /*
-   * =========================================================
-   * APPOINTMENT DATE CHANGE
-   * =========================================================
-   */
-
-  const handleAppointmentDateChange = (event) => {
-    setAppointmentDate(event.target.value);
-  };
-
-  /*
-   * =========================================================
-   * SUBMIT APPOINTMENT
-   * =========================================================
-   */
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError('');
 
+    // Field Validations
     if (!name.trim()) {
       setError('Name is required.');
       return;
     }
 
-    if (!phoneNumber.trim()) {
-      setError('Phone number is required.');
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (!phoneNumber.trim() || !phoneRegex.test(phoneNumber.trim())) {
+      setError('Please enter a valid 10-digit phone number.');
       return;
     }
 
@@ -167,7 +104,7 @@ function Appointment({ isOpen, onClose }) {
     try {
       setLoading(true);
 
-      const response = await createAppointment({
+      await createAppointment({
         name: name.trim(),
         phoneNumber: phoneNumber.trim(),
         appointmentDate,
@@ -176,21 +113,17 @@ function Appointment({ isOpen, onClose }) {
         problem: problem.trim(),
       });
 
-      console.log('Appointment created successfully:', response);
-
       setSuccess(true);
-
       setName('');
       setPhoneNumber('');
       setAppointmentDate('');
       setSpeciality('');
       setTiming('');
       setProblem('');
-    } catch (error) {
-      console.error('Failed to submit appointment:', error);
-
+    } catch (err) {
+      console.error('Failed to submit appointment:', err);
       setError(
-        error.response?.data?.message ||
+        err.response?.data?.message ||
           'Unable to submit your appointment request. Please try again.'
       );
     } finally {
@@ -198,40 +131,34 @@ function Appointment({ isOpen, onClose }) {
     }
   };
 
-  if (!isOpen) {
-    return null;
-  }
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      {/* BACKDROP */}
+      {/* Backdrop */}
       <div
         onClick={handleClose}
         className="fixed inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity duration-300"
       />
 
-      {/* CONTAINER FOR CENTERING & PADDING */}
+      {/* Modal Container */}
       <div className="flex min-h-full items-center justify-center p-4 sm:p-6 lg:p-8">
-        {/* MODAL CARD */}
         <div className="relative z-10 my-8 flex max-h-[calc(100vh-4rem)] w-full max-w-lg flex-col overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-slate-900/5 transition-all">
           
-          {/* HEADER (Sticky Top) */}
+          {/* Header */}
           <div className="shrink-0 border-b border-slate-100 bg-gradient-to-r from-teal-50/50 via-white to-emerald-50/30 px-6 py-5 sm:px-8">
             <div className="pr-8">
               <span className="inline-flex items-center rounded-full bg-teal-100/80 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-teal-800">
                 Appointment
               </span>
-
               <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
                 Book an Appointment
               </h2>
-
               <p className="mt-1 text-sm text-slate-500">
                 Tell us how we can help you with your health needs.
               </p>
             </div>
 
-            {/* CLOSE BUTTON */}
             <button
               type="button"
               onClick={handleClose}
@@ -243,31 +170,26 @@ function Appointment({ isOpen, onClose }) {
             </button>
           </div>
 
-          {/* SCROLLABLE BODY AREA */}
+          {/* Scrollable Body */}
           <div className="overflow-y-auto">
             {success ? (
-              /* SUCCESS STATE */
               <div className="space-y-6 px-6 py-8 sm:px-8">
                 <div className="space-y-2 text-center">
                   <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
                     <CheckCircle2 className="h-10 w-10" />
                   </div>
-
                   <h3 className="text-2xl font-bold text-slate-900">
                     Appointment Request Received
                   </h3>
-
                   <p className="text-sm text-slate-600">
                     We have received your appointment request.
                   </p>
                 </div>
 
-                {/* ACTION & CONTACT BOX */}
                 <div className="space-y-3 rounded-2xl border border-teal-100/80 bg-teal-50/60 p-5">
                   <p className="text-xs font-semibold uppercase tracking-wider text-teal-800">
                     To Confirm Your Appointment
                   </p>
-
                   <div className="grid gap-3 text-sm sm:grid-cols-2">
                     <a
                       href="https://wa.me/919884842776"
@@ -289,19 +211,13 @@ function Appointment({ isOpen, onClose }) {
                   </div>
                 </div>
 
-                {/* IMPORTANT NOTE */}
                 <div className="flex gap-3.5 rounded-2xl border border-amber-200/60 bg-amber-50/70 p-4 text-xs leading-relaxed text-amber-900">
                   <FileText className="h-5 w-5 shrink-0 text-amber-600" />
                   <div>
-                    <span className="font-bold">Important:</span> Please bring
-                    all your previous medical reports, prescriptions, scans, and
-                    relevant medical records with you when you visit the clinic.
-                    This will help our doctors better understand your medical
-                    history and provide appropriate care.
+                    <span className="font-bold">Important:</span> Please bring all your previous medical reports, prescriptions, scans, and relevant medical records with you when you visit the clinic.
                   </div>
                 </div>
 
-                {/* ACTION BUTTON */}
                 <button
                   type="button"
                   onClick={handleClose}
@@ -311,17 +227,10 @@ function Appointment({ isOpen, onClose }) {
                 </button>
               </div>
             ) : (
-              /* APPOINTMENT FORM */
-              <form
-                onSubmit={handleSubmit}
-                className="space-y-5 px-6 py-6 sm:px-8"
-              >
-                {/* NAME */}
+              <form onSubmit={handleSubmit} className="space-y-5 px-6 py-6 sm:px-8">
+                {/* Full Name */}
                 <div>
-                  <label
-                    htmlFor="appointment-name"
-                    className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700"
-                  >
+                  <label htmlFor="appointment-name" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700">
                     Full Name
                   </label>
                   <input
@@ -335,31 +244,26 @@ function Appointment({ isOpen, onClose }) {
                   />
                 </div>
 
-                {/* PHONE NUMBER */}
+                {/* Phone Number */}
                 <div>
-                  <label
-                    htmlFor="appointment-phone"
-                    className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700"
-                  >
+                  <label htmlFor="appointment-phone" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700">
                     Phone Number
                   </label>
                   <input
                     id="appointment-phone"
                     type="tel"
                     value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    placeholder="Enter your phone number"
+                    maxLength={10}
+                    onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
+                    placeholder="Enter 10-digit phone number"
                     disabled={loading}
                     className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 outline-none transition duration-200 focus:border-teal-600 focus:bg-white focus:ring-4 focus:ring-teal-500/10 disabled:bg-slate-100"
                   />
                 </div>
 
-                {/* SPECIALITY */}
+                {/* Speciality */}
                 <div>
-                  <label
-                    htmlFor="appointment-speciality"
-                    className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700"
-                  >
+                  <label htmlFor="appointment-speciality" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700">
                     Speciality
                   </label>
                   <select
@@ -378,12 +282,9 @@ function Appointment({ isOpen, onClose }) {
                   </select>
                 </div>
 
-                {/* APPOINTMENT DATE */}
+                {/* Date */}
                 <div>
-                  <label
-                    htmlFor="appointment-date"
-                    className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700"
-                  >
+                  <label htmlFor="appointment-date" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700">
                     Appointment Date
                   </label>
                   <input
@@ -391,7 +292,7 @@ function Appointment({ isOpen, onClose }) {
                     type="date"
                     value={appointmentDate}
                     min={getTodayDate()}
-                    onChange={handleAppointmentDateChange}
+                    onChange={(e) => setAppointmentDate(e.target.value)}
                     disabled={loading}
                     className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 outline-none transition duration-200 focus:border-teal-600 focus:bg-white focus:ring-4 focus:ring-teal-500/10 disabled:bg-slate-100"
                   />
@@ -400,7 +301,7 @@ function Appointment({ isOpen, onClose }) {
                   </p>
                 </div>
 
-                {/* TIMING */}
+                {/* Timings */}
                 {speciality && (
                   <div>
                     <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700">
@@ -428,12 +329,9 @@ function Appointment({ isOpen, onClose }) {
                   </div>
                 )}
 
-                {/* PROBLEM DESCRIPTION */}
+                {/* Problem Description */}
                 <div>
-                  <label
-                    htmlFor="appointment-problem"
-                    className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700"
-                  >
+                  <label htmlFor="appointment-problem" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700">
                     Describe Your Problem
                   </label>
                   <textarea
@@ -447,7 +345,7 @@ function Appointment({ isOpen, onClose }) {
                   />
                 </div>
 
-                {/* ERROR DISPLAY */}
+                {/* Error Banner */}
                 {error && (
                   <div className="flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50/80 px-4 py-3 text-sm text-rose-700">
                     <AlertCircle className="h-4 w-4 shrink-0" />
@@ -455,7 +353,7 @@ function Appointment({ isOpen, onClose }) {
                   </div>
                 )}
 
-                {/* SUBMIT BUTTON */}
+                {/* Submit Button */}
                 <button
                   type="submit"
                   disabled={loading}
